@@ -71,10 +71,20 @@ public class SensingComponent {
 	public String fwInfo;
 	public String swInfo;
 	public String hwInfo;
-	public NavSatFix gps;
+	public Double gpsLatitude;
+	public Double gpsLongitude;
+	public Double gpsAltitude;
 	public Long gpsTime;
-	public Point odometry;
-	public PoseWithCovariance pose;
+	public Double odoX;
+	public Double odoY;
+	public Double odoZ;
+	public Double poseX;
+	public Double poseY;
+	public Double poseZ;
+	public Double oriX;
+	public Double oriY;
+	public Double oriZ;
+	public Double oriW;
 	public Double temperature;
 	public Double humidity;
 	public WheelState wheelLeft;
@@ -156,34 +166,78 @@ public class SensingComponent {
 	@Process
 	@PeriodicScheduling(period = 200, offset = 50)
 	public static void sensePosition(@In("position") Position position,
-			@Out("gps") ParamHolder<NavSatFix> gps,
+			@Out("gpsLatitude") ParamHolder<Double> gpsLatitude,
+			@Out("gpsLongitude") ParamHolder<Double> gpsLongitude,
+			@Out("gpsAltitude") ParamHolder<Double> gpsAltitude,
 			@Out("gpsTime") ParamHolder<Long> gpsTime,
-			@Out("odometry") ParamHolder<Point> odometry,
-			@Out("pose") ParamHolder<PoseWithCovariance> pose) {
-		gps.value = position.getGpsPosition();
+			@Out("odoX") ParamHolder<Double> odoX,
+			@Out("odoY") ParamHolder<Double> odoY,
+			@Out("odoZ") ParamHolder<Double> odoZ,
+			@Out("poseX") ParamHolder<Double> poseX,
+			@Out("poseY") ParamHolder<Double> poseY,
+			@Out("poseZ") ParamHolder<Double> poseZ,
+			@Out("oriX") ParamHolder<Double> oriX,
+			@Out("oriY") ParamHolder<Double> oriY,
+			@Out("oriZ") ParamHolder<Double> oriZ,
+			@Out("oriW") ParamHolder<Double> oriW) {
+		NavSatFix gps = position.getGpsPosition();
+		if(gps != null){
+			gpsLatitude.value = gps.getLatitude();
+			gpsLongitude.value = gps.getLongitude();
+			gpsAltitude.value = gps.getAltitude();
+		}
+		
 		gpsTime.value = position.getGpsTime();
-		odometry.value = position.getOdometry();
-		pose.value = position.getPosition();
-		if(gps.value != null){
-		System.out.println(String.format("GPS Lat: %f Long: %f Alt: %f",
-				gps.value.getLatitude(), gps.value.getLongitude(),
-				gps.value.getAltitude()));
+		
+		Point odometry = position.getOdometry();
+		if(odometry != null){
+			odoX.value = odometry.getX();
+			odoY.value = odometry.getY();
+			odoZ.value = odometry.getZ();
+		}
+		
+		PoseWithCovariance pose = position.getPosition();
+		if(pose != null){
+			poseX.value = pose.getPose().getPosition().getX();
+			poseY.value = pose.getPose().getPosition().getY();
+			poseZ.value = pose.getPose().getPosition().getZ();
+			oriX.value = pose.getPose().getOrientation().getX();
+			oriY.value = pose.getPose().getOrientation().getY();
+			oriZ.value = pose.getPose().getOrientation().getZ();
+			oriW.value = pose.getPose().getOrientation().getW();
+		}
+		
+		if(gps != null){
+			System.out.println(String.format("GPS Lat: %f Long: %f Alt: %f",
+				gps.getLatitude(), gps.getLongitude(),
+				gps.getAltitude()));
 		} else {
 			System.out.println("GPS: No data received");
 		}
+		
 		System.out.println(String.format("GPS Time: %d", gpsTime.value));
-		System.out.println(String.format("Odometry: [%f, %f, %f]",
-				odometry.value.getX(), odometry.value.getY(),
-				odometry.value.getZ()));
-		System.out.println(String.format("Position: [%f, %f, %f]", pose.value
-				.getPose().getPosition().getX(), pose.value.getPose()
-				.getPosition().getY(), pose.value.getPose().getPosition()
-				.getZ()));
-		System.out.println(String.format("Orientation: [%f, %f, %f, %f]",
-				pose.value.getPose().getOrientation().getX(), pose.value
-						.getPose().getOrientation().getY(), pose.value
-						.getPose().getOrientation().getZ(), pose.value
-						.getPose().getOrientation().getW()));
+		
+		if(odometry != null){
+			System.out.println(String.format("Odometry: [%f, %f, %f]",
+				odometry.getX(), odometry.getY(),
+				odometry.getZ()));
+		} else {
+			System.out.println("Odometry: No data received");
+		}
+		
+		if(pose != null){
+			System.out.println(String.format("Position: [%f, %f, %f]", 
+				pose.getPose().getPosition().getX(),
+				pose.getPose().getPosition().getY(),
+				pose.getPose().getPosition().getZ()));
+			System.out.println(String.format("Orientation: [%f, %f, %f, %f]",
+				pose.getPose().getOrientation().getX(),
+				pose.getPose().getOrientation().getY(),
+				pose.getPose().getOrientation().getZ(),
+				pose.getPose().getOrientation().getW()));
+		} else {
+			System.out.println("Position and Orientation: No data received");
+		}
 	}
 
 	@Process

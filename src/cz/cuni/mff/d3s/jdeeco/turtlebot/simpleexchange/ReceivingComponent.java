@@ -1,8 +1,5 @@
 package cz.cuni.mff.d3s.jdeeco.turtlebot.simpleexchange;
 
-import geometry_msgs.Point;
-import geometry_msgs.PoseWithCovariance;
-import sensor_msgs.NavSatFix;
 import cz.cuni.mff.d3s.deeco.annotations.Component;
 import cz.cuni.mff.d3s.deeco.annotations.In;
 import cz.cuni.mff.d3s.deeco.annotations.PeriodicScheduling;
@@ -31,10 +28,20 @@ public class ReceivingComponent {
 	public String fwInfo;
 	public String swInfo;
 	public String hwInfo;
-	public NavSatFix gps;
+	public Double gpsLatitude;
+	public Double gpsLongitude;
+	public Double gpsAltitude;
 	public Long gpsTime;
-	public Point odometry;
-	public PoseWithCovariance pose;
+	public Double odoX;
+	public Double odoY;
+	public Double odoZ;
+	public Double poseX;
+	public Double poseY;
+	public Double poseZ;
+	public Double oriX;
+	public Double oriY;
+	public Double oriZ;
+	public Double oriW;
 	public Double temperature;
 	public Double humidity;
 	public WheelState wheelLeft;
@@ -94,21 +101,30 @@ public class ReceivingComponent {
 
 	@Process
 	@PeriodicScheduling(period = 1000, offset = 25)
-	public static void printPosition(@In("gps") NavSatFix gps,
-			@In("gpsTime") Long gpsTime, @In("odometry") Point odometry,
-			@In("pose") PoseWithCovariance pose) {
+	public static void printPosition(
+			@In("gpsLatitude") Double gpsLatitude,
+			@In("gpsLongitude") Double gpsLongitude,
+			@In("gpsAltitude") Double gpsAltitude,
+			@In("gpsTime") Long gpsTime,
+			@In("odoX") Double odoX,
+			@In("odoY") Double odoY,
+			@In("odoZ") Double odoZ,
+			@In("poseX") Double poseX,
+			@In("poseY") Double poseY,
+			@In("poseZ") Double poseZ,
+			@In("oriX") Double oriX,
+			@In("oriY") Double oriY,
+			@In("oriZ") Double oriZ,
+			@In("oriW") Double oriW) {
 		System.out.println(String.format("GPS Lat: %f Long: %f Alt: %f",
-				gps.getLatitude(), gps.getLongitude(), gps.getAltitude()));
+				gpsLatitude, gpsLongitude, gpsAltitude));
 		System.out.println(String.format("GPS Time: %d", gpsTime));
 		System.out.println(String.format("Odometry: [%f, %f, %f]",
-				odometry.getX(), odometry.getY(), odometry.getZ()));
-		System.out.println(String.format("Position: [%f, %f, %f]", pose
-				.getPose().getPosition().getX(), pose.getPose().getPosition()
-				.getY(), pose.getPose().getPosition().getZ()));
-		System.out.println(String.format("Orientation: [%f, %f, %f, %f]", pose
-				.getPose().getOrientation().getX(), pose.getPose()
-				.getOrientation().getY(), pose.getPose().getOrientation()
-				.getZ(), pose.getPose().getOrientation().getW()));
+				odoX, odoY, odoZ));
+		System.out.println(String.format("Position: [%f, %f, %f]",
+				poseX, poseY, poseZ));
+		System.out.println(String.format("Orientation: [%f, %f, %f, %f]",
+				oriX, oriY, oriZ, oriW));
 	}
 
 	@Process
