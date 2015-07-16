@@ -164,9 +164,13 @@ public class SensingComponent {
 		gpsTime.value = position.getGpsTime();
 		odometry.value = position.getOdometry();
 		pose.value = position.getPosition();
+		if(gps.value != null){
 		System.out.println(String.format("GPS Lat: %f Long: %f Alt: %f",
 				gps.value.getLatitude(), gps.value.getLongitude(),
 				gps.value.getAltitude()));
+		} else {
+			System.out.println("GPS: No data received");
+		}
 		System.out.println(String.format("GPS Time: %d", gpsTime.value));
 		System.out.println(String.format("Odometry: [%f, %f, %f]",
 				odometry.value.getX(), odometry.value.getY(),
