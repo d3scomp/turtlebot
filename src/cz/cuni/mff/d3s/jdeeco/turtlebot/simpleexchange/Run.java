@@ -7,6 +7,7 @@ import cz.cuni.mff.d3s.deeco.logging.Log;
 import cz.cuni.mff.d3s.deeco.runtime.DEECoNode;
 import cz.cuni.mff.d3s.deeco.timer.WallTimeTimer;
 import cz.cuni.mff.d3s.jdeeco.network.Network;
+import cz.cuni.mff.d3s.jdeeco.network.l2.strategy.KnowledgeInsertingStrategy;
 import cz.cuni.mff.d3s.jdeeco.publishing.DefaultKnowledgePublisher;
 import cz.cuni.mff.d3s.jdeeco.ros.BeeClickComm;
 import cz.cuni.mff.d3s.jdeeco.ros.Bumper;
@@ -48,10 +49,10 @@ public class Run {
 			switch (args[0]) {
 			case SENSE_SWITCH:
 				node = new DEECoNode(rand.nextInt(), t, services, new Network(),
-						new BeeClickComm(), new DefaultKnowledgePublisher());
+						new BeeClickComm(), new DefaultKnowledgePublisher(), new KnowledgeInsertingStrategy());
 
 				SensingComponent snsComponent = new SensingComponent(
-						"testComponent", SENSE_SWITCH);
+						SENSE_SWITCH, SENSE_SWITCH);
 				snsComponent.bumper = services.getService(Bumper.class);
 				snsComponent.buttons = services.getService(Buttons.class);
 				snsComponent.dockIR = services.getService(DockIR.class);
@@ -68,12 +69,20 @@ public class Run {
 				break;
 			case RECEIVE_SWITCH:
 				node = new DEECoNode(rand.nextInt(), t, services, new Network(), new BeeClickComm(),
-						new DefaultKnowledgePublisher());
+						/*new DefaultKnowledgePublisher(),*/ new KnowledgeInsertingStrategy());
 
 				ReceivingComponent recvComponent = new ReceivingComponent(
-						"testComponent", RECEIVE_SWITCH);
+						RECEIVE_SWITCH, RECEIVE_SWITCH);
 
 				node.deployComponent(recvComponent);
+				node.deployEnsemble(BumperEnsemble.class);
+				node.deployEnsemble(ButtonEnsemble.class);
+				node.deployEnsemble(DockEnsemble.class);
+				node.deployEnsemble(FloorEnsemble.class);
+				node.deployEnsemble(InfoEnsemble.class);
+				node.deployEnsemble(PositionEnsemble.class);
+				node.deployEnsemble(SHT1xEnsemble.class);
+				node.deployEnsemble(WheelEnsemble.class);
 				
 				break;
 			default:
