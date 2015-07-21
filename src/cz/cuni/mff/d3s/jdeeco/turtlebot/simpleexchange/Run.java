@@ -8,7 +8,7 @@ import cz.cuni.mff.d3s.deeco.runtime.DEECoNode;
 import cz.cuni.mff.d3s.deeco.timer.WallTimeTimer;
 import cz.cuni.mff.d3s.jdeeco.network.Network;
 import cz.cuni.mff.d3s.jdeeco.publishing.DefaultKnowledgePublisher;
-import cz.cuni.mff.d3s.jdeeco.ros.BeeClickComm;
+import cz.cuni.mff.d3s.jdeeco.ros.BeeClick;
 import cz.cuni.mff.d3s.jdeeco.ros.Bumper;
 import cz.cuni.mff.d3s.jdeeco.ros.Buttons;
 import cz.cuni.mff.d3s.jdeeco.ros.DockIR;
@@ -47,27 +47,40 @@ public class Run {
 					 InetAddress.getLocalHost().getHostName());
 			switch (args[0]) {
 			case SENSE_SWITCH:
+				Bumper bumper = new Bumper();
+				Buttons buttons = new Buttons();
+				DockIR dockIR = new DockIR();
+				FloorDistance floorDistance = new FloorDistance();
+				Info info = new Info();
+				LEDs leds = new LEDs();
+				Position position = new Position();
+				SHT1x sht1x = new SHT1x();
+				Speeker speeker = new Speeker();
+				Wheels wheels = new Wheels();
+				
 				node = new DEECoNode(rand.nextInt(), t, services, new Network(),
-						new BeeClickComm(), new DefaultKnowledgePublisher());
+						new BeeClick(), new DefaultKnowledgePublisher(),
+						bumper, buttons, dockIR, floorDistance, info, leds,
+						position, sht1x, speeker, wheels);
 
 				SensingComponent snsComponent = new SensingComponent(
 						"testComponent", SENSE_SWITCH);
-				snsComponent.bumper = services.getService(Bumper.class);
-				snsComponent.buttons = services.getService(Buttons.class);
-				snsComponent.dockIR = services.getService(DockIR.class);
-				snsComponent.floorDistance = services.getService(FloorDistance.class);
-				snsComponent.info = services.getService(Info.class);
-				snsComponent.leds = services.getService(LEDs.class);
-				snsComponent.position = services.getService(Position.class);
-				snsComponent.sht1x = services.getService(SHT1x.class);
-				snsComponent.speeker = services.getService(Speeker.class);
-				snsComponent.wheels = services.getService(Wheels.class);
+				snsComponent.bumper = bumper;
+				snsComponent.buttons = buttons;
+				snsComponent.dockIR = dockIR;
+				snsComponent.floorDistance = floorDistance;
+				snsComponent.info = info;
+				snsComponent.leds = leds;
+				snsComponent.position = position;
+				snsComponent.sht1x = sht1x;
+				snsComponent.speeker = speeker;
+				snsComponent.wheels = wheels;
 
 				node.deployComponent(snsComponent);
 				
 				break;
 			case RECEIVE_SWITCH:
-				node = new DEECoNode(rand.nextInt(), t, services, new Network(), new BeeClickComm(),
+				node = new DEECoNode(rand.nextInt(), t, services, new Network(), new BeeClick(),
 						new DefaultKnowledgePublisher());
 
 				ReceivingComponent recvComponent = new ReceivingComponent(

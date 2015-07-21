@@ -10,7 +10,7 @@ import cz.cuni.mff.d3s.deeco.task.ParamHolder;
 import cz.cuni.mff.d3s.jdeeco.ros.datatypes.WheelState;
 
 @Ensemble
-@PeriodicScheduling(period = 500, offset = 170)
+@PeriodicScheduling(period = 500, offset = 425)
 public class WheelEnsemble {
 
 	@Membership
