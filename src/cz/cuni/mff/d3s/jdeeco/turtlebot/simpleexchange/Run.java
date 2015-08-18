@@ -16,7 +16,7 @@ import cz.cuni.mff.d3s.jdeeco.ros.DockIR;
 import cz.cuni.mff.d3s.jdeeco.ros.FloorDistance;
 import cz.cuni.mff.d3s.jdeeco.ros.Info;
 import cz.cuni.mff.d3s.jdeeco.ros.LEDs;
-import cz.cuni.mff.d3s.jdeeco.ros.Position;
+import cz.cuni.mff.d3s.jdeeco.ros.Positioning;
 import cz.cuni.mff.d3s.jdeeco.ros.RosServices;
 import cz.cuni.mff.d3s.jdeeco.ros.SHT1x;
 import cz.cuni.mff.d3s.jdeeco.ros.Speeker;
@@ -54,7 +54,7 @@ public class Run {
 				FloorDistance floorDistance = new FloorDistance();
 				Info info = new Info();
 				LEDs leds = new LEDs();
-				Position position = new Position();
+				Positioning position = new Positioning();
 				SHT1x sht1x = new SHT1x();
 				Speeker speeker = new Speeker();
 				Wheels wheels = new Wheels();

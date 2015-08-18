@@ -1,8 +1,5 @@
 package cz.cuni.mff.d3s.jdeeco.turtlebot.simpleexchange;
 
-import geometry_msgs.Point;
-import geometry_msgs.PoseWithCovariance;
-import sensor_msgs.NavSatFix;
 import cz.cuni.mff.d3s.deeco.annotations.Component;
 import cz.cuni.mff.d3s.deeco.annotations.In;
 import cz.cuni.mff.d3s.deeco.annotations.Local;
@@ -16,7 +13,7 @@ import cz.cuni.mff.d3s.jdeeco.ros.DockIR;
 import cz.cuni.mff.d3s.jdeeco.ros.FloorDistance;
 import cz.cuni.mff.d3s.jdeeco.ros.Info;
 import cz.cuni.mff.d3s.jdeeco.ros.LEDs;
-import cz.cuni.mff.d3s.jdeeco.ros.Position;
+import cz.cuni.mff.d3s.jdeeco.ros.Positioning;
 import cz.cuni.mff.d3s.jdeeco.ros.SHT1x;
 import cz.cuni.mff.d3s.jdeeco.ros.Speeker;
 import cz.cuni.mff.d3s.jdeeco.ros.Wheels;
@@ -27,6 +24,11 @@ import cz.cuni.mff.d3s.jdeeco.ros.datatypes.DockingIRDiod;
 import cz.cuni.mff.d3s.jdeeco.ros.datatypes.DockingIRSignal;
 import cz.cuni.mff.d3s.jdeeco.ros.datatypes.FloorSensorID;
 import cz.cuni.mff.d3s.jdeeco.ros.datatypes.FloorSensorState;
+import cz.cuni.mff.d3s.jdeeco.ros.datatypes.GpsData;
+import cz.cuni.mff.d3s.jdeeco.ros.datatypes.InfoData;
+import cz.cuni.mff.d3s.jdeeco.ros.datatypes.Position;
+import cz.cuni.mff.d3s.jdeeco.ros.datatypes.PoseWithCovariance;
+import cz.cuni.mff.d3s.jdeeco.ros.datatypes.Weather;
 import cz.cuni.mff.d3s.jdeeco.ros.datatypes.WheelID;
 import cz.cuni.mff.d3s.jdeeco.ros.datatypes.WheelState;
 
@@ -50,7 +52,7 @@ public class SensingComponent {
 	@Local
 	public LEDs leds;
 	@Local
-	public Position position;
+	public Positioning position;
 	@Local
 	public SHT1x sht1x;
 	@Local
@@ -155,9 +157,10 @@ public class SensingComponent {
 			@Out("fwInfo") ParamHolder<String> fwInfo,
 			@Out("swInfo") ParamHolder<String> swInfo,
 			@Out("hwInfo") ParamHolder<String> hwInfo) {
-		fwInfo.value = info.getFirmwareInfo();
-		swInfo.value = info.getSoftwareInfo();
-		hwInfo.value = info.getHardwareInfo();
+		InfoData infoData = info.getInfo();
+		fwInfo.value = infoData.firmwareInfo;
+		swInfo.value = infoData.softwareInfo;
+		hwInfo.value = infoData.hardwareInfo;
 		System.out.println(String.format("FW: %s", fwInfo.value));
 		System.out.println(String.format("SW: %s", swInfo.value));
 		System.out.println(String.format("HW: %s", hwInfo.value));
@@ -165,7 +168,7 @@ public class SensingComponent {
 
 	@Process
 	@PeriodicScheduling(period = 500, offset = 125)
-	public static void sensePosition(@In("position") Position position,
+	public static void sensePosition(@In("position") Positioning position,
 			@Out("gpsLatitude") ParamHolder<Double> gpsLatitude,
 			@Out("gpsLongitude") ParamHolder<Double> gpsLongitude,
 			@Out("gpsAltitude") ParamHolder<Double> gpsAltitude,
@@ -180,37 +183,36 @@ public class SensingComponent {
 			@Out("oriY") ParamHolder<Double> oriY,
 			@Out("oriZ") ParamHolder<Double> oriZ,
 			@Out("oriW") ParamHolder<Double> oriW) {
-		NavSatFix gps = position.getGpsPosition();
+		GpsData gps = position.getGpsData();
 		if(gps != null){
-			gpsLatitude.value = gps.getLatitude();
-			gpsLongitude.value = gps.getLongitude();
-			gpsAltitude.value = gps.getAltitude();
+			gpsLatitude.value = gps.latitude;
+			gpsLongitude.value = gps.longitude;
+			gpsAltitude.value = gps.altitude;
+			gpsTime.value = gps.time;
 		}
 		
-		gpsTime.value = position.getGpsTime();
-		
-		Point odometry = position.getOdometry();
+		Position odometry = position.getOdometry();
 		if(odometry != null){
-			odoX.value = odometry.getX();
-			odoY.value = odometry.getY();
-			odoZ.value = odometry.getZ();
+			odoX.value = odometry.x;
+			odoY.value = odometry.y;
+			odoZ.value = odometry.z;
 		}
 		
 		PoseWithCovariance pose = position.getPosition();
 		if(pose != null){
-			poseX.value = pose.getPose().getPosition().getX();
-			poseY.value = pose.getPose().getPosition().getY();
-			poseZ.value = pose.getPose().getPosition().getZ();
-			oriX.value = pose.getPose().getOrientation().getX();
-			oriY.value = pose.getPose().getOrientation().getY();
-			oriZ.value = pose.getPose().getOrientation().getZ();
-			oriW.value = pose.getPose().getOrientation().getW();
+			poseX.value = pose.position.x;
+			poseY.value = pose.position.y;
+			poseZ.value = pose.position.z;
+			oriX.value = pose.orientation.x;
+			oriY.value = pose.orientation.y;
+			oriZ.value = pose.orientation.z;
+			oriW.value = pose.orientation.w;
 		}
 		
 		if(gps != null){
 			System.out.println(String.format("GPS Lat: %f Long: %f Alt: %f",
-				gps.getLatitude(), gps.getLongitude(),
-				gps.getAltitude()));
+				gps.latitude, gps.longitude,
+				gps.altitude));
 		} else {
 			System.out.println("GPS: No data received");
 		}
@@ -219,22 +221,21 @@ public class SensingComponent {
 		
 		if(odometry != null){
 			System.out.println(String.format("Odometry: [%f, %f, %f]",
-				odometry.getX(), odometry.getY(),
-				odometry.getZ()));
+				odometry.x, odometry.y, odometry.z));
 		} else {
 			System.out.println("Odometry: No data received");
 		}
 		
 		if(pose != null){
 			System.out.println(String.format("Position: [%f, %f, %f]", 
-				pose.getPose().getPosition().getX(),
-				pose.getPose().getPosition().getY(),
-				pose.getPose().getPosition().getZ()));
+				pose.position.x,
+				pose.position.y,
+				pose.position.z));
 			System.out.println(String.format("Orientation: [%f, %f, %f, %f]",
-				pose.getPose().getOrientation().getX(),
-				pose.getPose().getOrientation().getY(),
-				pose.getPose().getOrientation().getZ(),
-				pose.getPose().getOrientation().getW()));
+				pose.orientation.x,
+				pose.orientation.y,
+				pose.orientation.z,
+				pose.orientation.w));
 		} else {
 			System.out.println("Position and Orientation: No data received");
 		}
@@ -245,8 +246,9 @@ public class SensingComponent {
 	public static void senseSHT1x(@In("sht1x") SHT1x sht1x,
 			@Out("temperature") ParamHolder<Double> temperature,
 			@Out("humidity") ParamHolder<Double> humidity) {
-		temperature.value = sht1x.getTemperature();
-		humidity.value = sht1x.getHumidity();
+		Weather weather = sht1x.getWeather();
+		temperature.value = weather.temperature;
+		humidity.value = weather.humidity;
 		System.out.println(String.format("Temperature: %f", temperature.value));
 		System.out.println(String.format("Humidity: %f", humidity.value));
 	}
