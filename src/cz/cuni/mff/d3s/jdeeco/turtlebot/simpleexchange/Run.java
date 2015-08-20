@@ -141,6 +141,7 @@ public class Run {
 
 				node.deployComponent(srComponent);
 				node.deployEnsemble(SimpleEnsemble.class);
+				break;
 			default:
 				Log.e(String.format("The parameter \"%s\" not recognized.",
 						args[0]));
