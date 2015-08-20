@@ -25,7 +25,9 @@ import cz.cuni.mff.d3s.jdeeco.ros.Wheels;
 public class Run {
 
 	private static final String SENSE_SWITCH = "sense";
+	private static final String SIMPLE_SENSE_SWITCH = "simple_sense";
 	private static final String RECEIVE_SWITCH = "receive";
+	private static final String SIMPLE_RECEIVE_SWITCH = "simple_receive";
 
 	public static void main(String[] args) {
 		if (args.length != 1
@@ -46,18 +48,30 @@ public class Run {
 			RosServices services = new RosServices(
 					 System.getenv("ROS_MASTER_URI"),
 					 InetAddress.getLocalHost().getHostName());
+
+			Bumper bumper;
+			Buttons buttons;
+			DockIR dockIR;
+			FloorDistance floorDistance;
+			Info info;
+			LEDs leds;
+			Positioning position;
+			SHT1x sht1x;
+			Speeker speeker;
+			Wheels wheels;
+			
 			switch (args[0]) {
 			case SENSE_SWITCH:
-				Bumper bumper = new Bumper();
-				Buttons buttons = new Buttons();
-				DockIR dockIR = new DockIR();
-				FloorDistance floorDistance = new FloorDistance();
-				Info info = new Info();
-				LEDs leds = new LEDs();
-				Positioning position = new Positioning();
-				SHT1x sht1x = new SHT1x();
-				Speeker speeker = new Speeker();
-				Wheels wheels = new Wheels();
+				bumper = new Bumper();
+				buttons = new Buttons();
+				dockIR = new DockIR();
+				floorDistance = new FloorDistance();
+				info = new Info();
+				leds = new LEDs();
+				position = new Positioning();
+				sht1x = new SHT1x();
+				speeker = new Speeker();
+				wheels = new Wheels();
 				
 				node = new DEECoNode(rand.nextInt(), t, services, new Network(),
 						new BeeClick(), new DefaultKnowledgePublisher(),
@@ -81,6 +95,30 @@ public class Run {
 				node.deployComponent(snsComponent);
 				
 				break;
+			case SIMPLE_SENSE_SWITCH:
+				bumper = new Bumper();
+				buttons = new Buttons();
+				dockIR = new DockIR();
+				floorDistance = new FloorDistance();
+				info = new Info();
+				leds = new LEDs();
+				position = new Positioning();
+				sht1x = new SHT1x();
+				speeker = new Speeker();
+				wheels = new Wheels();
+				
+				node = new DEECoNode(rand.nextInt(), t, services, new Network(),
+						new BeeClick(), new DefaultKnowledgePublisher(),
+						new KnowledgeInsertingStrategy(), bumper, buttons,
+						dockIR, floorDistance, info, leds,
+						position, sht1x, speeker, wheels);
+
+				SimpleSensingComponent ssComponent = new SimpleSensingComponent(
+						SIMPLE_SENSE_SWITCH, SIMPLE_SENSE_SWITCH);
+				ssComponent.rosServices = services;
+
+				node.deployComponent(ssComponent);
+				break;
 			case RECEIVE_SWITCH:
 				node = new DEECoNode(rand.nextInt(), t, services, new Network(), new BeeClick(),
 						new KnowledgeInsertingStrategy());
@@ -99,6 +137,15 @@ public class Run {
 				node.deployEnsemble(WheelEnsemble.class);
 				
 				break;
+			case SIMPLE_RECEIVE_SWITCH:
+				node = new DEECoNode(rand.nextInt(), t, services, new Network(), new BeeClick(),
+						new KnowledgeInsertingStrategy());
+
+				SimpleReceivingComponent srComponent = new SimpleReceivingComponent(
+						SIMPLE_RECEIVE_SWITCH, SIMPLE_RECEIVE_SWITCH);
+
+				node.deployComponent(srComponent);
+				node.deployEnsemble(SimpleEnsemble.class);
 			default:
 				Log.e(String.format("The parameter \"%s\" not recognized.",
 						args[0]));
