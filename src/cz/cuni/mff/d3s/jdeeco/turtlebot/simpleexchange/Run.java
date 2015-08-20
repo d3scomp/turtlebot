@@ -30,14 +30,9 @@ public class Run {
 	private static final String SIMPLE_RECEIVE_SWITCH = "simple_receive";
 
 	public static void main(String[] args) {
-		if (args.length != 1
-				|| (!SENSE_SWITCH.equals(args[0]) 
-						&& !RECEIVE_SWITCH.equals(args[0]))) {
+		if (args.length != 1) {
 			Log.e("Turtlebot Simple Exchange run without a correct parameter.");
-			System.out
-					.println(String
-							.format("The Run class takes one argument with a value from {\"%s\", \"%s\"}",
-									SENSE_SWITCH, RECEIVE_SWITCH));
+			System.out.println("Turtlebot Simple Exchange run without a correct parameter.");
 			System.exit(1);
 		}
 
@@ -151,8 +146,8 @@ public class Run {
 						args[0]));
 				System.out
 						.println(String
-								.format("The Run class takes one argument with a value from {\"%s\", \"%s\"}",
-										SENSE_SWITCH, RECEIVE_SWITCH));
+								.format("The Run class takes one argument with a value from {\"%s\", \"%s\", \"%s\", \"%s\"}",
+										SENSE_SWITCH, SIMPLE_SENSE_SWITCH, RECEIVE_SWITCH, SIMPLE_RECEIVE_SWITCH));
 				System.exit(1);
 			}
 		} catch (Exception e) {
